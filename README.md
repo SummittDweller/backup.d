@@ -36,10 +36,12 @@ python backup.d/restore.py
 
 ```
 ## Dependencies
+
 The SSH feature (see below) reqiures installation of ssh-copy-id.
-  On your Mac use... `brew install ssh-copy-id`
+  * On your Mac use... `brew install ssh-copy-id`
+
 The scripts also reqiure the Python _colorama_ library.  
-  On your Mac use... `pip install colorama`
+  * On your Mac use... `pip install colorama`
 
 ##A Note About SSH
 If the user of this script has a valid private|public **id_rsa** key pair in **~/.ssh** these scripts will attempt to push the public key (**id_rsa.pub**) out to the remote server so that passwordless **_sudo_** access is automatic. 
