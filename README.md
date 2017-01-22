@@ -35,4 +35,5 @@ cd project_directory
 python backup.d/restore.py
 
 ```
-
+##A Note About SSH
+If the user of this script has a valid private|public **id_rsa** key pair in **~/.ssh** these scripts will attempt to push the public key (**id_rsa.pub**) out to the remote server so that passwordless **_sudo_** access is automatic. 
