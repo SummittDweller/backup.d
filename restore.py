@@ -89,25 +89,31 @@ error = subprocess.check_call(args)
 command = "mkdir /tmp/restore; tar -xzvf " + path + " -C /tmp/restore" 
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
+
+# rsync /tmp/restore/ to vars.site_path
+command = "rsync -ruv /tmp/restore/ " + vars.site_path
+args = [ "ssh", userAtServer, command ]
+print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to t$
+error = subprocess.check_call(args)
 
 # rsync /tmp/restore/ to vars.site_path 
 command = "rsync -ruv /tmp/restore/ " + vars.site_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Define a drush sql-cli command to restore the database
 command = "sql-cli < " + vars.site_path + "/files/" + vars.server + ".sql"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to restore the database from backup..." + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Use drush to flush the cache
 command = "cr all"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to flush the site cache"
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Cleanup the remote sever
 args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
@@ -115,3 +121,4 @@ print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET +
 error = subprocess.check_call(args)
 
 print "\n\n"
+
