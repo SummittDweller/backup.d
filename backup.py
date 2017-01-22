@@ -29,9 +29,11 @@ project/
 from colorama import init
 from colorama import Style, Fore, Back
 import vars
+import getpass
 import os
 import subprocess
 import sys
+import glob
 from datetime import datetime
 
 init()  # for Colorama
@@ -46,7 +48,7 @@ if (not os.path.isdir("backup.d")):
 
 if (not os.path.isdir(".data")):
   print Style.BRIGHT + Fore.RED + "\nThe required .data/ directory does NOT exist.  Let's make one now.\n" + Style.RESET_ALL
-  os.mkdir(".data", 0776);
+  os.mkdir(".data", 0776)
 
 # Get the current time and build a destination file name
 timeStamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
@@ -55,23 +57,36 @@ destination = "/home/" + vars.user + "/" + file
 userAtServer = vars.user + "@" + vars.server
 local = cwd + "/.data/" + file
 
+# Determine the user's home directory so we can check for a public SSH key.
+homeDir = os.path.expanduser("~")
+pubKey = homeDir + "/.ssh/id_rsa.pub"
+
+# If the user of this script has an id_rsa|id_rsa.pub (private|public) key pair append the public key the remote user's ~/.ssh/authorized_keys.
+if os.path.isfile(pubKey):
+  args = [ "ssh-copy-id", "-i", pubKey, userAtServer ]
+  print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file " \
+                                                                                         "authentication..."
+  error = subprocess.check_call(args)
+else:
+  print Style.BRIGHT + Fore.RED + "\nNo ~/.ssh/id_rsa.pub public key found so the " + userAtServer + " password may be required several times. " + Fore.RESET
+
 # Cleanup the remote server before beginning
 command = "rm -f /home/" + vars.user + "/" + vars.server + ".sql /home/" + vars.user + "/" + vars.backup
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to clean up... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Define a 'drush cr all' command to flush the cache
 command = "cr all"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to clear the cache"
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Try 'drush sql-dump' instead of 'drush ard', it's easier to control
 command = "sql-dump --result-file=" + vars.site_path + "/files/" + vars.server + ".sql --skip-tables-key=common"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET +" to dump the database... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Follow up with a 'tar' command under better control
 skip = [ "config_*", "*/files/css/*", "*/js/*", "*/php/*", "*services.yml", "*settings.php" ]
@@ -80,7 +95,7 @@ command = "tar -czvf " + destination + " -C " + vars.site_path + " . /home/" + v
 command = "tar -czvf " + destination + " -C " + vars.site_path + " . --exclude=" + exclude
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to create a backup... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # No problems thus far?...rsync the file back to the host
 args = [ "rsync", "-aruvi", userAtServer + ":" + destination, local ]
@@ -93,11 +108,13 @@ if os.path.isdir(vars.stick):
     print Style.BRIGHT + "\nRunning " + Fore.GREEN + ' '.join(args) + Fore.RESET + " to copy the backup to your mounted " + vars.stick + " volume..."  + Style.RESET_ALL
     error = subprocess.check_call(args)
     
-    files = filter(os.path.isfile, os.listdir(vars.stick))
-    print "\nContents of " + vars.stick + " now includes: "
-    for f in files:
-        print "  " + f
+    print Style.BRIGHT + Fore.GREEN + "\nContents of " + vars.stick + ": " + Style.RESET_ALL
+    print "  " + "\n  ".join(glob.glob(vars.stick + "/*"))
     print "\n\n"
+
+    #files = filter(os.path.isfile, os.listdir(vars.stick))
+    #for f in files:
+    #    print "  " + f
 
 else:
     print Style.BRIGHT + "\nMount a portable drive at " + vars.stick + " and use "
