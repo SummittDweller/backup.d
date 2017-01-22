@@ -37,7 +37,7 @@ python backup.d/restore.py
 ```
 ## Dependencies
 
-The SSH feature (see below) reqiures installation of ssh-copy-id.
+The SSH feature (see below) reqiures installation of _ssh-copy-id_.
   * On your Mac use... `brew install ssh-copy-id`
 
 The scripts also reqiure the Python _colorama_ library.  
