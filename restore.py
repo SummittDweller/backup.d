@@ -91,14 +91,8 @@ args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
 error = subprocess.check_call(args)
 
-# Ensure that vars.site_path is writeable
-command = "chmod -R 777  + path + " -C /tmp/restore" 
-args = [ "ssh", userAtServer, command ]
-print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
-error = subprocess.check_call(args)
-
 # Ensure that vars.site_path is writeable and rsync /tmp/restore/ to vars.site_path 
-command = "chmod -R 777 " + vars_site_path + "; rsync -ruv /tmp/restore/ " + vars.site_path
+command = "chmod -R 777 " + vars.site_path + "; rsync -ruv /tmp/restore/ " + vars.site_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
 error = subprocess.check_call(args)
