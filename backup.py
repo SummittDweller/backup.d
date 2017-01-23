@@ -64,9 +64,11 @@ pubKey = homeDir + "/.ssh/id_rsa.pub"
 # If the user of this script has an id_rsa|id_rsa.pub (private|public) key pair append the public key the remote user's ~/.ssh/authorized_keys.
 if os.path.isfile(pubKey):
   args = [ "ssh-copy-id", "-i", pubKey, userAtServer ]
-  print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file " \
-                                                                                         "authentication..."
-  error = subprocess.check_call(args)
+  print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file authentication..."
+  try:
+    subprocess.check_output(args, stderr=subprocess.STDOUT)
+  except subprocess.CalledProcessError as e:
+    print e.output  
 else:
   print Style.BRIGHT + Fore.RED + "\nNo ~/.ssh/id_rsa.pub public key found so the " + userAtServer + " password may be required several times. " + Fore.RESET
 
