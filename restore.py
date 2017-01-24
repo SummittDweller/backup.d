@@ -58,11 +58,14 @@ local = cwd + "/.data"
 homeDir = os.path.expanduser("~")
 pubKey = homeDir + "/.ssh/id_rsa.pub"
 
-# If the user of this script has an id_rsa|id_rsa.pub (private|public) key pair, append the public key the remote user's ~/.ssh/authorized_keys.
+# If the user of this script has an id_rsa|id_rsa.pub (private|public) key pair append the public key the remote user's ~/.ssh/authorized_keys.
 if os.path.isfile(pubKey):
   args = [ "ssh-copy-id", "-i", pubKey, userAtServer ]
   print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file authentication..."
-  error = subprocess.check_call(args)
+  try:
+    subprocess.check_output(args, stderr=subprocess.STDOUT)
+  except subprocess.CalledProcessError as e:
+    print e.output
 else:
   print Style.BRIGHT + Fore.RED + "\nNo ~/.ssh/id_rsa.pub public key found so the " + userAtServer + " password may be required several times. " + Fore.RESET
 
@@ -87,25 +90,25 @@ error = subprocess.check_call(args)
 command = "mkdir /tmp/restore; tar -xzvf " + path + " -C /tmp/restore" 
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
-# Make sure vars.site_path is writeable and rsync /tmp/restore/ to vars.site_path 
+# Ensure that vars.site_path is writeable and rsync /tmp/restore/ to vars.site_path 
 command = "chmod 777 " + vars.site_path + "; rsync -ruv /tmp/restore/ " + vars.site_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Define a drush sql-cli command to restore the database
 command = "sql-cli < " + vars.site_path + "/files/" + vars.server + ".sql"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to restore the database from backup..." + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Use drush to flush the cache
 command = "cr all"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to flush the site cache"
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Cleanup the remote sever
 args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
@@ -113,3 +116,4 @@ print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET +
 error = subprocess.check_call(args)
 
 print "\n\n"
+
