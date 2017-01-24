@@ -61,8 +61,7 @@ pubKey = homeDir + "/.ssh/id_rsa.pub"
 # If the user of this script has an id_rsa|id_rsa.pub (private|public) key pair, append the public key the remote user's ~/.ssh/authorized_keys.
 if os.path.isfile(pubKey):
   args = [ "ssh-copy-id", "-i", pubKey, userAtServer ]
-  print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file " \
-                                                                                         "authentication..."
+  print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file authentication..."
   error = subprocess.check_call(args)
 else:
   print Style.BRIGHT + Fore.RED + "\nNo ~/.ssh/id_rsa.pub public key found so the " + userAtServer + " password may be required several times. " + Fore.RESET
@@ -71,11 +70,10 @@ else:
 if os.path.isdir(vars.stick):
   stick_path = max(glob.iglob(vars.stick + "/" + vars.backup + '*'), key=os.path.getctime)
   args = ["rsync", "-aruvi", stick_path, local]
-  print Style.BRIGHT + "\nRunning " + Fore.GREEN + ' '.join(args) + Fore.RESET + " to copy the latest backup from your mounted " + vars.stick + " volume..."  + Style.RESET_ALL
+  print Style.BRIGHT + "\nRunning " + Fore.GREEN + ' '.join(args) + Style.RESET_ALL + " to copy the latest backup from your mounted " + vars.stick + " volume..." 
   error = subprocess.check_call(args)
-
 else:
-  print Style.BRIGHT + "\nMount a portable drive at " + vars.stick + " to pull backups for restoration."
+  print Style.BRIGHT + "\nMount a portable drive at " + vars.stick + " to pull backups for restoration." + Style.RESET_ALL
 
 # Find the latest file matching the backup* filename pattern
 file_path = max(glob.iglob(local + "/" + vars.backup + '*'), key=os.path.getctime)
@@ -91,8 +89,8 @@ args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
 error = subprocess.check_call(args);
 
-# rsync /tmp/restore/ to vars.site_path 
-command = "rsync -ruv /tmp/restore/ " + vars.site_path
+# Make sure vars.site_path is writeable and rsync /tmp/restore/ to vars.site_path 
+command = "chmod 777 " + vars.site_path + "; rsync -ruv /tmp/restore/ " + vars.site_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
 error = subprocess.check_call(args);
