@@ -7,6 +7,7 @@ A vars.py script must also exist in this same directory and it must be modified 
 Backups will be stored in and restored from a .data directory off the parent directory where the project lives.
 
 The typical project tree structure looks like this...
+
 ```
 project/
   file1
@@ -24,15 +25,26 @@ project/
    
 ```
 You should invoke backup and subsequent restore using commands of the form...
+
 ```
 cd project_directory
-python .backup.d/backup.py
+python backup.d/backup.py
 
 ```
 ...and...
+
 ```
 cd project_directory
-python .backup.d/restore.py
+python backup.d/restore.py
 
 ```
+## Dependencies
 
+The SSH feature (see below) reqiures installation of _ssh-copy-id_.
+  * On your Mac use... `brew install ssh-copy-id`
+
+The scripts also reqiure the Python _colorama_ library.  
+  * On your Mac use... `pip install colorama`
+
+##A Note About SSH
+If the user of this script has a valid private|public **id_rsa** key pair in **~/.ssh** these scripts will attempt to push the public key (**id_rsa.pub**) out to the remote server so that passwordless **_sudo_** access is automatic. 

@@ -1,4 +1,4 @@
-""" backup.d/backup.py
+""" backup.d/restore.py
 
 Use this Python script from the command line (terminal) in combination with backup.py. You should first cd to
   your project directory holding one or more *.tar.gz backups in a .data directory.  This
@@ -54,15 +54,30 @@ userAtServer = vars.user + "@" + vars.server
 path = "/home/" + vars.user + "/" + vars.backup
 local = cwd + "/.data"
 
+# Determine the user's home directory so we can check for a public SSH key.
+homeDir = os.path.expanduser("~")
+pubKey = homeDir + "/.ssh/id_rsa.pub"
+
+# If the user of this script has an id_rsa|id_rsa.pub (private|public) key pair append the public key the remote user's ~/.ssh/authorized_keys.
+if os.path.isfile(pubKey):
+  args = [ "ssh-copy-id", "-i", pubKey, userAtServer ]
+  print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to establish key file authentication..."
+  try:
+    subprocess.check_output(args, stderr=subprocess.STDOUT)
+  except subprocess.CalledProcessError as e:
+    print e.output
+else:
+  print Style.BRIGHT + Fore.RED + "\nNo ~/.ssh/id_rsa.pub public key found so the " + userAtServer + " password may be required several times. " + Fore.RESET
+
+>>>>>>> fa34b0b68798ad4aee0390011f3b6c273367b45f
 # If stick is mounted, copy the latest backup from there to the current directory
 if os.path.isdir(vars.stick):
   stick_path = max(glob.iglob(vars.stick + "/" + vars.backup + '*'), key=os.path.getctime)
   args = ["rsync", "-aruvi", stick_path, local]
-  print Style.BRIGHT + "\nRunning " + Fore.GREEN + ' '.join(args) + Fore.RESET + " to copy the latest backup from your mounted " + vars.stick + " volume..."  + Style.RESET_ALL
+  print Style.BRIGHT + "\nRunning " + Fore.GREEN + ' '.join(args) + Style.RESET_ALL + " to copy the latest backup from your mounted " + vars.stick + " volume..." 
   error = subprocess.check_call(args)
-
 else:
-  print Style.BRIGHT + "\nMount a portable drive at " + vars.stick + " to pull backups for restoration."
+  print Style.BRIGHT + "\nMount a portable drive at " + vars.stick + " to pull backups for restoration." + Style.RESET_ALL
 
 # Find the latest file matching the backup* filename pattern
 file_path = max(glob.iglob(local + "/" + vars.backup + '*'), key=os.path.getctime)
@@ -76,19 +91,25 @@ error = subprocess.check_call(args)
 command = "mkdir /tmp/restore; tar -xzvf " + path + " -C /tmp/restore" 
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
-# rsync /tmp/restore/ to vars.site_path 
-command = "rsync -ruv /tmp/restore/ " + vars.site_path
+# Ensure that vars.site_path is writeable and rsync /tmp/restore/ to vars.site_path 
+command = "chmod 777 " + vars.site_path + "; rsync -ruv /tmp/restore/ " + vars.site_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
 
 # Define a drush sql-cli command to restore the database
 command = "sql-cli < " + vars.site_path + "/files/" + vars.server + ".sql"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to restore the database from backup..." + Style.RESET_ALL
-error = subprocess.check_call(args);
+error = subprocess.check_call(args)
+
+# Use drush to flush the cache
+command = "cr all"
+args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
+print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to flush the site cache"
+error = subprocess.check_call(args)
 
 # Cleanup the remote sever
 args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
