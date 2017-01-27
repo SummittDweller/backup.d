@@ -69,7 +69,6 @@ if os.path.isfile(pubKey):
 else:
   print Style.BRIGHT + Fore.RED + "\nNo ~/.ssh/id_rsa.pub public key found so the " + userAtServer + " password may be required several times. " + Fore.RESET
 
->>>>>>> fa34b0b68798ad4aee0390011f3b6c273367b45f
 # If stick is mounted, copy the latest backup from there to the current directory
 if os.path.isdir(vars.stick):
   stick_path = max(glob.iglob(vars.stick + "/" + vars.backup + '*'), key=os.path.getctime)
