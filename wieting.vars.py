@@ -10,5 +10,6 @@ stick = "/Volumes/WIETING"                                        # name of a mo
 server = "wieting.dev"                                            # the remote server name
 user = "vagrant"                                                  # admin user on the remote server
 drush_alias = "@wieting.dev"                                      # drush alias for the remote site
-site_path = "/var/www/drupalvm/drupal/web/sites/default"          # path to the Drupal site on the remote server
+web_path = "/var/www/drupalvm/drupal/web/"                        # path to the Drupal web on the remote server
+site_path = web_path + "sites/default"                            # path to the Drupal site on the remote server
 drush = "/var/www/drupalvm/drupal/vendor/drush/drush/drush.php"   # remote server path to drush

@@ -98,6 +98,12 @@ args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
 error = subprocess.check_call(args)
 
+# @TODO: Temporary.  rsync vars.site_path/libraries back into the Drupal web root.
+command = "mkdir " + vars.web_path + "libraries; rsync -aruvi " + vars.site_path + "/libraries " + vars.web_path
+args = [ "ssh", userAtServer, command ]
+print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from " + vars.site_path + "/libraries back to " + vars.web_path + "... " + Style.RESET_ALL
+error = subprocess.check_call(args)
+
 # Define a drush sql-cli command to restore the database
 command = "sql-cli < " + vars.site_path + "/files/" + vars.server + ".sql"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]

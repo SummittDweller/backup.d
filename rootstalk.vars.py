@@ -12,5 +12,6 @@ stick = "/Volumes/RS"                                             # name of a mo
 server = "rootstalk.grinnell.edu"                                 # the remote server name
 user = "dguser"                                                   # admin user on the remote server
 drush_alias = "@rootstalk.prod"                                   # drush alias for the remote site
-site_path = "/var/www/html/drupal/web/sites/default"              # path to the Drupal site on the remote server
+web_path = "/var/www/html/drupal/web/"                            # path to the Drupal web root on the remote server
+site_path = web_path + "sites/default"                            # path to the Drupal site on the remote server
 drush = "/var/www/html/drupal/vendor/drush/drush/drush.php"       # remote server path to drush

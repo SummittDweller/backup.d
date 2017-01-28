@@ -92,7 +92,7 @@ error = subprocess.check_call(args)
 # Follow up with a 'tar' command under better control
 skip = [ "*/.git/*", "config_*", "*/files/css/*", "*/js/*", "*/php/*", "*services.yml", "*settings.php" ]
 exclude = " --exclude=".join(skip)
-command = "tar -czvf " + destination + " -C " + vars.site_path + " . /home/" + vars.user + "/*.sql --exclude=" + exclude
+# command = "tar -czvf " + destination + " -C " + vars.site_path + " . /home/" + vars.user + "/*.sql --exclude=" + exclude
 command = "tar -czvf " + destination + " -C " + vars.site_path + " . --exclude=" + exclude
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to create a backup... " + Style.RESET_ALL
