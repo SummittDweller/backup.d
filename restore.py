@@ -53,6 +53,7 @@ if (not os.path.isdir("backup.d")):
 userAtServer = vars.user + "@" + vars.server
 path = "/home/" + vars.user + "/" + vars.backup
 local = cwd + "/.data"
+libraries = vars.web_path + "libraries"
 
 # Determine the user's home directory so we can check for a public SSH key.
 homeDir = os.path.expanduser("~")
@@ -99,7 +100,7 @@ print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET +
 error = subprocess.check_call(args)
 
 # @TODO: Temporary.  rsync vars.site_path/libraries back into the Drupal web root.
-command = "mkdir " + vars.web_path + "libraries; rsync -aruvi " + vars.site_path + "/libraries " + vars.web_path
+command = "mkdir " + libraries + "; chmod 777 " + libraries + "; rsync -aruvi " + vars.site_path + "/libraries " + vars.web_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from " + vars.site_path + "/libraries back to " + vars.web_path + "... " + Style.RESET_ALL
 error = subprocess.check_call(args)
