@@ -118,8 +118,8 @@ print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.
 error = subprocess.check_call(args)
 
 # Cleanup the remote sever
-args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
-print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to cleanup the remote server... " + Style.RESET_ALL
-error = subprocess.check_call(args)
+# args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
+# print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to cleanup the remote server... " + Style.RESET_ALL
+# error = subprocess.check_call(args)
 
 print "\n\n"
