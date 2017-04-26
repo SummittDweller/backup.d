@@ -1,4 +1,4 @@
-""" backup.d/restore.py
+""" backup.d/migrate.py
 
 Use this Python script from the command line (terminal) in combination with backup.py. You should first cd to
   your project directory holding one or more *.tar.gz backups in a .data directory.  This
@@ -20,6 +20,7 @@ project/
   backup.d/
     backup.py
     restore.py
+    migrate.py
     vars.py
   .data/
     project.tar.gz_timestamp
@@ -106,7 +107,7 @@ error = subprocess.check_call(args)
 #error = subprocess.check_call(args)
 
 # Define a drush sql-cli command to restore the database
-command = "sql-cli < " + vars.site_path + "/files/" + vars.server + ".sql"
+command = "sql-cli < " + vars.site_path + "/files/" + vars.backup_server + ".sql"
 args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to restore the database from backup..." + Style.RESET_ALL
 error = subprocess.check_call(args)
@@ -118,8 +119,8 @@ print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.
 error = subprocess.check_call(args)
 
 # Cleanup the remote sever
-# args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
-# print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to cleanup the remote server... " + Style.RESET_ALL
-# error = subprocess.check_call(args)
+args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
+print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to cleanup the remote server... " + Style.RESET_ALL
+error = subprocess.check_call(args)
 
 print "\n\n"

@@ -9,9 +9,9 @@ Customized 26-Apr-2017 to restore a backup from @rootstalk.prod to @rootstalk.de
 
 backup = "rootstalk.tar.gz"                                       # name the backup file
 stick = "/Volumes/RS"                                             # name of a mounted drive to accept a copy of the backup
-server = "rootstalk.grinnell.dev"                                 # the remote 'destination' server name
+server = "rootstalk.grinnell.dev"                                 # the remote server name
 backup_server = "rootstalk.grinnell.edu"                          # the remote server that the backup came from
-user = "vagrant"                                                  # admin user on the remote 'destination' server
+user = "vagrant"                                                  # admin user on the remote server
 drush_alias = "@rootstalk.dev"                                    # drush alias for the remote site
 web_path = "/var/www/drupal/web/"                                 # path to the Drupal web root on the remote server
 site_path = web_path + "sites/default"                            # path to the Drupal site on the remote server
