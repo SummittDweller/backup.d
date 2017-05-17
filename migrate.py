@@ -51,8 +51,8 @@ if (not os.path.isdir("backup.d")):
   exit(1)
 
 # OK, build some credentials and paths
-userAtServer = vars.user + "@" + vars.server
-path = "/home/" + vars.user + "/" + vars.backup
+userAtServer = vars.migrate_user + "@" + vars.migrate_server
+path = "/home/" + vars.migrate_user + "/" + vars.backup
 local = cwd + "/.data"
 libraries = vars.web_path + "libraries"
 
@@ -88,14 +88,14 @@ args = [ "rsync", "-aruvi", file_path, userAtServer + ":" + path ]
 print Style.BRIGHT + "\nRunning '" + Fore.GREEN + ' '.join(args) + Fore.RESET + "' to copy the backup to the server..."  + Style.RESET_ALL
 error = subprocess.check_call(args)
 
-# Extract everything from the tar file to /tmp/restore
-command = "mkdir /tmp/restore; tar -xzvf " + path + " -C /tmp/restore" 
+# Clear /tmp/restore and extract everything from the tar file to /tmp/restore
+command = "rm -fr /tmp/restore; mkdir /tmp/restore; tar -xzvf " + path + " -C /tmp/restore"
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to extract files from the backup to /tmp/restore... " + Style.RESET_ALL
 error = subprocess.check_call(args)
 
-# Ensure that vars.site_path is writeable and rsync /tmp/restore/ to vars.site_path 
-command = "chmod 777 " + vars.site_path + "; rsync -ruv /tmp/restore/ " + vars.site_path
+# Ensure that vars.migrate_path is writeable and rsync /tmp/restore/ to vars.migrate_path 
+command = "chmod 777 " + vars.migrate_path + "; rsync -ruv /tmp/restore/ " + vars.migrate_path
 args = [ "ssh", userAtServer, command ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from /tmp/restore to the destination... " + Style.RESET_ALL
 error = subprocess.check_call(args)
@@ -106,20 +106,26 @@ error = subprocess.check_call(args)
 #print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to copy files from " + vars.site_path + "/libraries back to " + vars.web_path + "... " + Style.RESET_ALL
 #error = subprocess.check_call(args)
 
+# Rename the sql backup
+command = "mv -f " + vars.migrate_path + "/files/" + vars.server + ".sql " + vars.migrate_path + "/files/" + vars.migrate_server + ".sql "
+args = [ "ssh", userAtServer, command ]
+print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to rename the SQL backup..." + Style.RESET_ALL
+error = subprocess.check_call(args)
+
 # Define a drush sql-cli command to restore the database
-command = "sql-cli < " + vars.site_path + "/files/" + vars.backup_server + ".sql"
-args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
+command = "sql-cli < " + vars.migrate_path + "/files/" + vars.migrate_server + ".sql"
+args = [ "ssh", userAtServer, vars.drush, vars.migrate_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to restore the database from backup..." + Style.RESET_ALL
 error = subprocess.check_call(args)
 
 # Use drush to flush the cache
 command = "cr all"
-args = [ "ssh", userAtServer, vars.drush, vars.drush_alias, command ]
+args = [ "ssh", userAtServer, vars.drush, vars.migrate_alias, command ]
 print Style.BRIGHT + "\nLaunching remote " + Fore.GREEN + " ".join(args) + Fore.RESET + " to flush the site cache"
 error = subprocess.check_call(args)
 
 # Cleanup the remote sever
-args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.site_path + "/files/*.sql" ]
+args = [ "ssh", userAtServer, "rm -f", path + "* ", vars.migrate_path + "/files/*.sql" ]
 print Style.BRIGHT + "\nLaunching " + Fore.GREEN + " ".join(args) + Fore.RESET + " to cleanup the remote server... " + Style.RESET_ALL
 error = subprocess.check_call(args)
 
